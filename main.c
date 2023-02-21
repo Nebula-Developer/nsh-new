@@ -119,11 +119,50 @@ void parse_space(char *str, char **parsed) {
     }
 }
 
-void log(char *str) {
-    printf("\n\n%s\n\n", str);
-}
-
 int process_string(char *str, char **parsed, char **parsed_pip) {
+    // Replace all variables ($var) with their values
+    int i;
+    for (i = 0; i < strlen(str); i++) {
+        if (str[i] == '$') {
+            int j = i + 1;
+            char var[100];
+            int k = 0;
+            while (str[j] != ' ' && str[j] != '\0') {
+                var[k] = str[j];
+                j++;
+                k++;
+            }
+            var[k] = '\0';
+
+            char *value = getenv(var);
+            if (value != NULL) {
+                char *new_str = malloc(strlen(str) + strlen(value) + 1);
+                if (new_str == NULL) {
+                    printf("Error allocating memory\n");
+                    exit(1);
+                }
+                strcpy(new_str, str);
+                new_str[i] = '\0';
+                strcat(new_str, value);
+                strcat(new_str, str + j);
+                strcpy(str, new_str);
+                free(new_str);
+            } else {
+                // Replace with empty string
+                char *new_str = malloc(strlen(str) + 1);
+                if (new_str == NULL) {
+                    printf("Error allocating memory\n");
+                    exit(1);
+                }
+                strcpy(new_str, str);
+                new_str[i] = '\0';
+                strcat(new_str, str + j);
+                strcpy(str, new_str);
+                free(new_str);
+            }
+        }
+    }
+
     char *str_piped[2];
     int piped = 0;
 
