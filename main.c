@@ -148,7 +148,6 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
             strcat(new_str, str + j);
             strcpy(str, new_str);
             free(new_str);
-
         }
     }
 
@@ -171,11 +170,12 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
 }
 
 int check_integrated_command(char **parsed) {
-    int no_of_integrated_commands = 3, i, switch_integrated_command = 0;
+    int no_of_integrated_commands = 4, i, switch_integrated_command = 0;
     char *integrated_commands[no_of_integrated_commands];
     integrated_commands[0] = "cd";
     integrated_commands[1] = "help";
     integrated_commands[2] = "exit";
+    integrated_commands[3] = "export";
 
     for (i = 0; i < no_of_integrated_commands; i++) {
         if (strcmp(parsed[0], integrated_commands[i]) == 0) {
@@ -193,6 +193,9 @@ int check_integrated_command(char **parsed) {
             return 1;
         case 3:
             exit(0);
+        case 4:
+            setenv(parsed[1], parsed[2], 1);
+            return 1;
         default:
             break;
     }
