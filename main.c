@@ -133,6 +133,9 @@ bool is_exitting_char(char c) {
 }
 
 int process_string(char *str, char **parsed, char **parsed_pip) {
+    char *str_clone = malloc(strlen(str));
+    strcpy(str_clone, str);
+
     // Replace all variables ($var) with their values
     int i;
     for (i = 0; i < strlen(str); i++) {
@@ -176,7 +179,7 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
         parse_space(str, parsed);
     }
 
-    if (check_integrated_command(parsed, str))
+    if (check_integrated_command(parsed, str_clone))
         return 0;
     else
         return 1 + piped;
@@ -207,7 +210,8 @@ int check_integrated_command(char **parsed, char *all) {
         case 3:
             exit(0);
         case 4:
-            setenv(parsed[1], all + strlen(parsed[1]) + strlen(parsed[0]) + 2, 1);
+            printf("All: %s\n", all);
+            setenv(parsed[1], all + (strlen(parsed[1]) + strlen(parsed[0]) + 2), 1);
             return 1;
         default:
             break;
