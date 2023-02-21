@@ -1,5 +1,5 @@
 .PHONY: run
 
 run:
-	gcc -o ./main ./main.c -lreadline
+	g++ -o ./main ./src/main.cpp ./src/input.cpp -ltermcap
 	./main

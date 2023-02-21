@@ -4,8 +4,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <termcap.h>
+#include <iostream>
+#include "input.hpp"
 
 #define bool int
 #define true 1
@@ -20,20 +21,6 @@ int check_integrated_command(char **parsed, char *all);
 
 void init_shell() {
     clearscr();
-    sleep(1);
-    clearscr();
-}
-
-int get_input(char *input) {
-    char *buf;
-    buf = readline(">>> ");
-    if (strlen(buf) != 0) {
-        add_history(buf);
-        strcpy(input, buf);
-        return 0;
-    } else {
-        return 1;
-    }
 }
 
 void exec_args(char **parsed) {
@@ -117,7 +104,7 @@ void parse_space(char* str, char** parsed) {
     int i = 0;
     while (token != NULL) {
         if (strchr(token, ' ') != NULL) {
-            parsed[i] = malloc(strlen(token) + 3); // add space for quotes and null terminator
+            parsed[i] = (char *)malloc(strlen(token) + 3); // add space for quotes and null terminator
             sprintf(parsed[i], "\"%s\"", token);
         } else {
             parsed[i] = token;
@@ -133,7 +120,7 @@ bool is_exitting_char(char c) {
 }
 
 int process_string(char *str, char **parsed, char **parsed_pip) {
-    char *str_clone = malloc(strlen(str));
+    char *str_clone = (char *)malloc(strlen(str));
     strcpy(str_clone, str);
 
     // Replace all variables ($var) with their values
@@ -151,7 +138,7 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
             var[k] = '\0';
 
             char *value = getenv(var);
-            char *new_str = malloc(strlen(str) + (value == NULL ? 0 : strlen(value)) + 1);
+            char *new_str = (char *)malloc(strlen(str) + (value == NULL ? 0 : strlen(value)) + 1);
             if (new_str == NULL) {
                 printf("Error allocating memory\n");
                 exit(1);
@@ -187,14 +174,14 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
 
 int check_integrated_command(char **parsed, char *all) {
     int no_of_integrated_commands = 4, i, switch_integrated_command = 0;
-    char *integrated_commands[no_of_integrated_commands];
+    std::string integrated_commands[no_of_integrated_commands];
     integrated_commands[0] = "cd";
     integrated_commands[1] = "help";
     integrated_commands[2] = "exit";
     integrated_commands[3] = "export";
 
     for (i = 0; i < no_of_integrated_commands; i++) {
-        if (strcmp(parsed[0], integrated_commands[i]) == 0) {
+        if (strcmp(parsed[0], integrated_commands[i].c_str()) == 0) {
             switch_integrated_command = i + 1;
             break;
         }
@@ -228,15 +215,12 @@ int main() {
     init_shell();
 
     while (1) {
-        if (get_input(input))
-            continue;
+        strcpy(input, get_input().c_str());
         exec_flag = process_string(input, parsed_args, parsed_args_piped);
 
-        if (exec_flag == 1)
-           exec_args(parsed_args);
+        if (exec_flag == 1) exec_args(parsed_args);
 
-        if (exec_flag == 2)
-           exec_args_piped(parsed_args, parsed_args_piped);
+        if (exec_flag == 2) exec_args_piped(parsed_args, parsed_args_piped);
     }
 
     return 0;
