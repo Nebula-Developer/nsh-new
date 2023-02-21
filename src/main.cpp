@@ -197,7 +197,6 @@ int check_integrated_command(char **parsed, char *all) {
         case 3:
             exit(0);
         case 4:
-            printf("All: %s\n", all);
             setenv(parsed[1], all + (strlen(parsed[1]) + strlen(parsed[0]) + 2), 1);
             return 1;
         default:
