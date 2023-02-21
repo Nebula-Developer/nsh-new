@@ -7,12 +7,16 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#define bool int
+#define true 1
+#define false 0
+
 #define MAX_INPUT 1000
 #define MAX_ARGS 100
 
 #define clearscr() printf("\033[H\033[J")
 
-int check_integrated_command(char **parsed);
+int check_integrated_command(char **parsed, char *all);
 
 void init_shell() {
     clearscr();
@@ -108,15 +112,24 @@ int parse_pipe(char *str, char **str_piped) {
         return 1;
 }
 
-void parse_space(char *str, char **parsed) {
-    int i;
-    for (i = 0; i < MAX_ARGS; i++) {
-        parsed[i] = strsep(&str, " ");
-        if (parsed[i] == NULL)
-            break;
-        if (strlen(parsed[i]) == 0)
-            i--;
+void parse_space(char* str, char** parsed) {
+    char* token = strtok(str, " ");
+    int i = 0;
+    while (token != NULL) {
+        if (strchr(token, ' ') != NULL) {
+            parsed[i] = malloc(strlen(token) + 3); // add space for quotes and null terminator
+            sprintf(parsed[i], "\"%s\"", token);
+        } else {
+            parsed[i] = token;
+        }
+        i++;
+        token = strtok(NULL, " ");
     }
+    parsed[i] = NULL; // set the last element to NULL to mark the end of the array
+}
+
+bool is_exitting_char(char c) {
+    return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
 }
 
 int process_string(char *str, char **parsed, char **parsed_pip) {
@@ -127,7 +140,7 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
             int j = i + 1;
             char var[100];
             int k = 0;
-            while (str[j] != ' ' && str[j] != '\0') {
+            while (!is_exitting_char(str[j])) {
                 var[k] = str[j];
                 j++;
                 k++;
@@ -163,13 +176,13 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
         parse_space(str, parsed);
     }
 
-    if (check_integrated_command(parsed))
+    if (check_integrated_command(parsed, str))
         return 0;
     else
         return 1 + piped;
 }
 
-int check_integrated_command(char **parsed) {
+int check_integrated_command(char **parsed, char *all) {
     int no_of_integrated_commands = 4, i, switch_integrated_command = 0;
     char *integrated_commands[no_of_integrated_commands];
     integrated_commands[0] = "cd";
@@ -194,7 +207,7 @@ int check_integrated_command(char **parsed) {
         case 3:
             exit(0);
         case 4:
-            setenv(parsed[1], parsed[2], 1);
+            setenv(parsed[1], all + strlen(parsed[1]) + strlen(parsed[0]) + 2, 1);
             return 1;
         default:
             break;
