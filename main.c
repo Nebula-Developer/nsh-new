@@ -135,31 +135,20 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
             var[k] = '\0';
 
             char *value = getenv(var);
-            if (value != NULL) {
-                char *new_str = malloc(strlen(str) + strlen(value) + 1);
-                if (new_str == NULL) {
-                    printf("Error allocating memory\n");
-                    exit(1);
-                }
-                strcpy(new_str, str);
-                new_str[i] = '\0';
-                strcat(new_str, value);
-                strcat(new_str, str + j);
-                strcpy(str, new_str);
-                free(new_str);
-            } else {
-                // Replace with empty string
-                char *new_str = malloc(strlen(str) + 1);
-                if (new_str == NULL) {
-                    printf("Error allocating memory\n");
-                    exit(1);
-                }
-                strcpy(new_str, str);
-                new_str[i] = '\0';
-                strcat(new_str, str + j);
-                strcpy(str, new_str);
-                free(new_str);
+            char *new_str = malloc(strlen(str) + (value == NULL ? 0 : strlen(value)) + 1);
+            if (new_str == NULL) {
+                printf("Error allocating memory\n");
+                exit(1);
             }
+            strcpy(new_str, str);
+            new_str[i] = '\0';
+            if (value != NULL) {
+                strcat(new_str, value);
+            }
+            strcat(new_str, str + j);
+            strcpy(str, new_str);
+            free(new_str);
+
         }
     }
 
