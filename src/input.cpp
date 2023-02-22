@@ -107,7 +107,7 @@ std::string get_input() {
                 input = input.substr(0, x - 1) + input.substr(x, input.length());
                 x--;
             }
-        } else if (c == 236) {
+        } else if (c == 23) {
             if (x > 0) {
                 // Remove the character before x
                 input = input.substr(0, x - 1) + input.substr(x, input.length());
@@ -127,7 +127,7 @@ std::string get_input() {
         }
 
         set_pos(0, y);
-        printf("Char: %d", c);
+        printf("Char: %d     ", c);
         
         std::string match = get_path_match(input);
         std::string match_substr = "";
