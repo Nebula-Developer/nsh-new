@@ -135,9 +135,14 @@ bool is_exitting_char(char c) {
     return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
 }
 
+void debug_log(std::string header, int num) {
+    printf("%s: %d\n", header.c_str(), num);
+}
+
 int process_string(char *str, char **parsed, char **parsed_pip) {
     // Replace all variables ($var) with their values
     int i;
+    debug_log("Process", 1);
     for (i = 0; i < strlen(str); i++) {
         if (str[i] == '$') {
             int j = i + 1;
@@ -180,6 +185,8 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
         }
     }
 
+    debug_log("Process", 2);
+
     char *str_clone = (char *)malloc(strlen(str));
     strcpy(str_clone, str);
 
@@ -195,6 +202,8 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
         parse_space(str, parsed);
     }
 
+    debug_log("Process", 3);
+
     if (check_integrated_command(parsed, str_clone))
         return 0;
     else
@@ -202,6 +211,7 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
 }
 
 int check_integrated_command(char **parsed, char *all) {
+    debug_log("Check integrated", 1);
     int no_of_integrated_commands = 4, i, switch_integrated_command = 0;
     std::string integrated_commands[no_of_integrated_commands];
     integrated_commands[0] = "cd";
@@ -209,12 +219,16 @@ int check_integrated_command(char **parsed, char *all) {
     integrated_commands[2] = "exit";
     integrated_commands[3] = "export";
 
+    debug_log("Check integrated", 2);
+
     for (i = 0; i < no_of_integrated_commands; i++) {
         if (strcmp(parsed[0], integrated_commands[i].c_str()) == 0) {
             switch_integrated_command = i + 1;
             break;
         }
     }
+
+    debug_log("Check integrated", 3);
 
     switch (switch_integrated_command) {
         case 1:
@@ -233,8 +247,12 @@ int check_integrated_command(char **parsed, char *all) {
             break;
     }
 
+    debug_log("Check integrated", 4);
+
     return 0;
 }
+
+
 
 int main() {
     init_path_files();
@@ -246,6 +264,7 @@ int main() {
 
     while (1) {
         strcpy(input, get_input().c_str());
+        if (strcmp(input, "") == 0) continue;
         exec_flag = process_string(input, parsed_args, parsed_args_piped);
 
         if (exec_flag == 1) exec_args(parsed_args);

@@ -83,13 +83,25 @@ std::string get_prefix(bool color = true) {
     return (color ? get_fg_color(100, 200, 255) : "") + cwd + (color ? get_fg_color(100, 255, 200) : "") + " $ " + (color ? RESET : "");
 }
 
+int y = 0;
+int x = 0;
+
+// Signal
+void sigint_input_handler(int a) {
+    set_pos(get_prefix(false).length() + x, y - 1);
+    std::cout << get_bg_color(255, 255, 255) << get_fg_color(0, 0, 0) << "%c" << RESET;
+    set_pos(get_prefix(false).length() + x, y - 1);
+    fflush(stdout);
+}
+
 std::string get_input() {
     std::string input;
     std::string old_input;
+    signal(SIGINT, sigint_input_handler);
 
     enable_input_mode();
-    int y = get_y_pos();
-    int x = 0;
+    y = get_y_pos();
+    x = 0;
 
     set_pos(0, y - 1);
     std::cout << get_prefix();
@@ -126,8 +138,8 @@ std::string get_input() {
             // left arrow
         }
 
-        set_pos(0, y);
-        printf("Char: %d     ", c);
+        // set_pos(0, y);
+        // printf("Char: %d     ", c);
         
         std::string match = get_path_match(input);
         std::string match_substr = "";
@@ -178,6 +190,8 @@ std::string get_input() {
 
     disable_raw_mode();
     printf("\r\n");
+
+    signal(SIGINT, NULL);
 
     return input;
 }
