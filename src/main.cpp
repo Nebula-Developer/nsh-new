@@ -36,7 +36,7 @@ void exec_args(char **parsed) {
         return;
     } else if (pid == 0) {
         if (execvp(parsed[0], parsed) < 0) {
-            printf("Failed to execute command.\n");
+            printf("nsh: command not found: %s\n", parsed[0]);
         }
         exit(0);
     } else {
