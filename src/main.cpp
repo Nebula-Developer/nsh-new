@@ -6,14 +6,20 @@
 #include <sys/wait.h>
 #include <termcap.h>
 #include <iostream>
+#include "util.hpp"
 #include "input.hpp"
 
 #define bool int
 #define true 1
 #define false 0
 
+#ifndef MAX_INPUT
 #define MAX_INPUT 1000
+#endif
+
+#ifndef MAX_ARGS
 #define MAX_ARGS 100
+#endif
 
 #define clearscr() printf("\033[H\033[J")
 
@@ -100,19 +106,21 @@ int parse_pipe(char *str, char **str_piped) {
 }
 
 void parse_space(char* str, char** parsed) {
-    char* token = strtok(str, " ");
-    int i = 0;
-    while (token != NULL) {
-        if (strchr(token, ' ') != NULL) {
-            parsed[i] = (char *)malloc(strlen(token) + 3); // add space for quotes and null terminator
-            sprintf(parsed[i], "\"%s\"", token);
-        } else {
-            parsed[i] = token;
-        }
-        i++;
-        token = strtok(NULL, " ");
+    int i;
+    for (i = 0; i < MAX_ARGS; i++) {
+        parsed[i] = strsep(&str, " ");
+        if (parsed[i] == NULL)
+            break;
+        if (strlen(parsed[i]) == 0)
+            i--;
     }
-    parsed[i] = NULL; // set the last element to NULL to mark the end of the array
+
+    if (i == MAX_ARGS) {
+        printf("Too many arguments\n");
+        exit(1);
+    }
+
+    parsed[i] = NULL;
 }
 
 bool is_exitting_char(char c) {

@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <termcap.h>
 #include <iostream>
+#include "util.hpp"
 #include "input.hpp"
 
 #define bool int
@@ -91,7 +92,7 @@ void init_pos() {
 void set_pos(int x, int y) {
     init_pos();
 
-    char *str = tgoto(tgetstr("cm", NULL), x, y);
+    char *str = tgoto(tgetstr(literal_to_char("cm"), NULL), x, y);
     printf("%s", str);
 }
 

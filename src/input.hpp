@@ -1,6 +1,6 @@
 
-#ifndef _INPUT_H_
-#define _INPUT_H_
+#ifndef _INPUT_HPP_
+#define _INPUT_HPP_
 
 std::string get_input();
 void set_pos(int x, int y);
