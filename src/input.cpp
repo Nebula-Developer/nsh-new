@@ -37,9 +37,11 @@ std::string get_prefix() {
 
 std::string get_input() {
     std::string input;
+    std::string old_input;
 
     enable_input_mode();
     int y = get_y_pos();
+    int x = 0;
 
     set_pos(0, y - 1);
     std::cout << get_prefix();
@@ -52,16 +54,45 @@ std::string get_input() {
         if (c == 10) {
             break;
         } else if (c == 127) {
-            if (input.length() > 0) {
-                input.pop_back();
+            if (x > 0) {
+                // Remove the character before x
+                input = input.substr(0, x - 1) + input.substr(x, input.length());
+                x--;
             }
-        } else {
-            input += c;
+            // else if is character (between 32 and 126)
+        } else if (c >= 32 && c <= 126) {
+            // Insert the character at x
+            input = input.substr(0, x) + c + input.substr(x, input.length());
+            x++;
+            // left arrow
+        } else if (c == 27 && get_key() == 91) {
+            switch (get_key()) {
+                case 68:
+                    if (x > 0) {
+                        x--;
+                    }
+                    break;
+                case 67:
+                    if (x < input.length()) {
+                        x++;
+                    }
+                    break;
+            }
         }
 
         set_pos(0, y - 1);
-        std::cout << get_prefix() << input;
+        std::string diff_spaces = "";
+        
+        for (int i = 0; i < abs((int)old_input.length() - (int)input.length()); i++) {
+            diff_spaces += " ";
+        }
+
+        std::string prefix = get_prefix();
+        std::cout << prefix << input << diff_spaces;
+        set_pos(prefix.length() + x, y - 1);
         fflush(stdout);
+
+        old_input = input;
     }
 
     disable_raw_mode();

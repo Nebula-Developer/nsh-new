@@ -26,7 +26,7 @@
 int check_integrated_command(char **parsed, char *all);
 
 void init_shell() {
-    clearscr();
+
 }
 
 void exec_args(char **parsed) {
