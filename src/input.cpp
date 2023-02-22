@@ -112,67 +112,73 @@ std::string get_input() {
     while (1) {
         int c = get_key();
         double time1 = get_time();
-        // Start a timer to see how long it takes to register a key
-
-        if (c == 10) {
-            break;
-        } else if (c == 127) {
-            if (x > 0) {
-                // Remove the character before x
-                input = input.substr(0, x - 1) + input.substr(x, input.length());
-                x--;
-            }
-        } else if (c == 23) {
-            if (x > 0) {
-                // Remove the character before x
-                input = input.substr(0, x - 1) + input.substr(x, input.length());
-                x--;
-
-                // Keep deleting the current word
-                while (x > 0 && input[x - 1] != ' ') {
-                    input = input.substr(0, x - 1) + input.substr(x, input.length());
-                    x--;
-                }
-            }
-        } else if (c >= 32 && c <= 126) {
-            // Insert the character at x
-            input = input.substr(0, x) + (char)c + input.substr(x, input.length());
-            x++;
-            // left arrow
-        }
-
-        // set_pos(0, y);
-        // printf("Char: %d     ", c);
         
         std::string match = get_path_match(input);
         std::string match_substr = "";
-        if (match.length() > input.length()) {
+        if (match.length() > input.length())
             match_substr = match.substr(input.length(), match.length());
-        }
 
-        if (c == 27 && get_key() == 91) {
-            switch (get_key()) {
-                case 68:
-                    if (x > 0) {
+        if (c == 10) break;
+
+        switch (c) {
+            case 127:
+                if (x > 0) {
+                    // Remove the character before x
+                    input = input.substr(0, x - 1) + input.substr(x, input.length());
+                    x--;
+                }
+                break;
+
+            case 23:
+                if (x > 0) {
+                    // Remove the character before x
+                    input = input.substr(0, x - 1) + input.substr(x, input.length());
+                    x--;
+
+                    // Keep deleting the current word
+                    while (x > 0 && input[x - 1] != ' ') {
+                        input = input.substr(0, x - 1) + input.substr(x, input.length());
                         x--;
                     }
-                    break;
-                case 67:
-                    if (x < input.length()) {
-                        x++;
-                    } else {
-                        input += match_substr;
-                        x += match_substr.length();
-                        match_substr = "";
-                    }
-                    break;
-            }
-        } else if (c == 9) {
-            if (match_substr.length() > 0) {
-                input += match_substr;
-                x += match_substr.length();
-                match_substr = "";
-            }
+                }
+                break;
+
+            case 27:
+                if (get_key() != 91) break;
+                switch (get_key()) {
+                    case 68:
+                        if (x > 0) {
+                            x--;
+                        }
+                        break;
+                    case 67:
+                        if (x < input.length()) {
+                            x++;
+                        } else {
+                            input += match_substr;
+                            x += match_substr.length();
+                            match_substr = "";
+                        }
+                        break;
+                }
+                break;
+
+            case 9:
+                if (match_substr.length() > 0) {
+                    input += match_substr;
+                    x += match_substr.length();
+                    match_substr = "";
+                }
+                break;
+
+            default:
+                if (c >= 32 && c <= 126) {
+                    // Insert the character at x
+                    input = input.substr(0, x) + (char)c + input.substr(x, input.length());
+                    x++;
+                    // left arrow
+                }
+                break;
         }
 
         set_pos(0, y - 1);
