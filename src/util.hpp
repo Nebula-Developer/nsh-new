@@ -5,5 +5,6 @@
 #include <string>
 
 char *literal_to_char(std::string literal);
+double get_time();
 
 #endif

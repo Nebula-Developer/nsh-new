@@ -24,6 +24,12 @@
 
 #define clearscr() printf("\033[H\033[J")
 
+bool debug = false;
+
+void debug_log(std::string header, int num) {
+    if (debug) printf("%s: %d\n", header.c_str(), num);
+}
+
 std::string run_regex(std::string str, std::string regex) {
     std::regex re(regex);
     std::smatch match;
@@ -114,6 +120,16 @@ int parse_pipe(char *str, char **str_piped) {
 }
 
 void parse_space(char* str, char** parsed) {
+    debug_log("Parse Space", 1);
+    // If str without spaces is empty, return
+    std::string str_without_spaces = run_regex(str, "[^ ]+");
+    if (str_without_spaces.length() == 0) {
+        parsed[0] = NULL;
+        return;
+    }
+
+    debug_log("Parse Space", 2);
+
     int i;
     for (i = 0; i < MAX_ARGS; i++) {
         parsed[i] = strsep(&str, " ");
@@ -123,20 +139,11 @@ void parse_space(char* str, char** parsed) {
             i--;
     }
 
-    if (i == MAX_ARGS) {
-        printf("Too many arguments\n");
-        exit(1);
-    }
-
-    parsed[i] = NULL;
+    debug_log("Parse Space", 3);
 }
 
 bool is_exitting_char(char c) {
     return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
-}
-
-void debug_log(std::string header, int num) {
-    printf("%s: %d\n", header.c_str(), num);
 }
 
 int process_string(char *str, char **parsed, char **parsed_pip) {
@@ -220,6 +227,9 @@ int check_integrated_command(char **parsed, char *all) {
     integrated_commands[3] = "export";
 
     debug_log("Check integrated", 2);
+
+    if (parsed[0] == NULL)
+        return 1;
 
     for (i = 0; i < no_of_integrated_commands; i++) {
         if (strcmp(parsed[0], integrated_commands[i].c_str()) == 0) {

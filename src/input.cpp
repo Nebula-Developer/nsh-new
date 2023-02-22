@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 #include <dirent.h>
+#include <signal.h>
+#include <algorithm>
 #include "colors.hpp"
 #include "util.hpp"
 #include "input.hpp"
@@ -109,6 +111,7 @@ std::string get_input() {
 
     while (1) {
         int c = get_key();
+        double time1 = get_time();
         // Start a timer to see how long it takes to register a key
 
         if (c == 10) {
@@ -186,6 +189,11 @@ std::string get_input() {
         fflush(stdout);
 
         old_input = input + match_substr;
+
+        set_pos(0, y);
+        printf("Time: %f", get_time() - time1);
+        set_pos(prefix_no_c.length() + x, y - 1);
+        fflush(stdout);
     }
 
     disable_raw_mode();
