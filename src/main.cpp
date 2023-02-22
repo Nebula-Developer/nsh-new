@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <termcap.h>
 #include <iostream>
+#include <regex>
 #include "util.hpp"
 #include "input.hpp"
 
@@ -22,6 +23,13 @@
 #endif
 
 #define clearscr() printf("\033[H\033[J")
+
+std::string run_regex(std::string str, std::string regex) {
+    std::regex re(regex);
+    std::smatch match;
+    std::regex_search(str, match, re);
+    return match[0];
+}
 
 int check_integrated_command(char **parsed, char *all);
 
@@ -211,6 +219,7 @@ int check_integrated_command(char **parsed, char *all) {
     switch (switch_integrated_command) {
         case 1:
             chdir(parsed[1]);
+            setenv("PWD", getcwd(NULL, 0), 1);
             return 1;
         case 2:
             printf("NSH by @Nebula-Developer ~ 2023\n");

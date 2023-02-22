@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <dirent.h>
+#include "colors.hpp"
 #include "util.hpp"
 #include "input.hpp"
 
@@ -71,7 +72,7 @@ char get_key() {
     return c;
 }
 
-std::string get_prefix() {
+std::string get_prefix(bool color = true) {
     std::string cwd = getcwd(NULL, 0);
     // Replace home with ~
     char *home = getenv("HOME");
@@ -79,7 +80,7 @@ std::string get_prefix() {
         cwd.replace(0, strlen(home), "~");
     }
 
-    return cwd + " > ";
+    return (color ? get_fg_color(100, 200, 255) : "") + cwd + (color ? get_fg_color(100, 255, 200) : "") + " $ " + (color ? RESET : "");
 }
 
 std::string get_input() {
@@ -95,7 +96,7 @@ std::string get_input() {
     fflush(stdout);
 
     while (1) {
-        char c = get_key();
+        int c = get_key();
         // Start a timer to see how long it takes to register a key
 
         if (c == 10) {
@@ -106,13 +107,27 @@ std::string get_input() {
                 input = input.substr(0, x - 1) + input.substr(x, input.length());
                 x--;
             }
-            // else if is character (between 32 and 126)
+        } else if (c == 236) {
+            if (x > 0) {
+                // Remove the character before x
+                input = input.substr(0, x - 1) + input.substr(x, input.length());
+                x--;
+
+                // Keep deleting the current word
+                while (x > 0 && input[x - 1] != ' ') {
+                    input = input.substr(0, x - 1) + input.substr(x, input.length());
+                    x--;
+                }
+            }
         } else if (c >= 32 && c <= 126) {
             // Insert the character at x
-            input = input.substr(0, x) + c + input.substr(x, input.length());
+            input = input.substr(0, x) + (char)c + input.substr(x, input.length());
             x++;
             // left arrow
         }
+
+        set_pos(0, y);
+        printf("Char: %d", c);
         
         std::string match = get_path_match(input);
         std::string match_substr = "";
@@ -152,9 +167,10 @@ std::string get_input() {
             diff_spaces += " ";
         }
 
-        std::string prefix = get_prefix();
-        std::cout << prefix << input << match_substr << diff_spaces;
-        set_pos(prefix.length() + x, y - 1);
+        std::string prefix = get_prefix(true);
+        std::string prefix_no_c = get_prefix(false);
+        std::cout << prefix << get_fg_color(205, 225, 255) << input << get_fg_color(100, 100, 100) << match_substr << diff_spaces << RESET;
+        set_pos(prefix_no_c.length() + x, y - 1);
         fflush(stdout);
 
         old_input = input + match_substr;
