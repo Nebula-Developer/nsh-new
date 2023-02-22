@@ -128,9 +128,6 @@ bool is_exitting_char(char c) {
 }
 
 int process_string(char *str, char **parsed, char **parsed_pip) {
-    char *str_clone = (char *)malloc(strlen(str));
-    strcpy(str_clone, str);
-
     // Replace all variables ($var) with their values
     int i;
     for (i = 0; i < strlen(str); i++) {
@@ -159,8 +156,24 @@ int process_string(char *str, char **parsed, char **parsed_pip) {
             strcat(new_str, str + j);
             strcpy(str, new_str);
             free(new_str);
+        } else if (str[i] == '~') {
+            char *home = getenv("HOME");
+            char *new_str = (char *)malloc(strlen(str) + strlen(home) + 1);
+            if (new_str == NULL) {
+                printf("Error allocating memory\n");
+                exit(1);
+            }
+            strcpy(new_str, str);
+            new_str[i] = '\0';
+            strcat(new_str, home);
+            strcat(new_str, str + i + 1);
+            strcpy(str, new_str);
+            free(new_str);
         }
     }
+
+    char *str_clone = (char *)malloc(strlen(str));
+    strcpy(str_clone, str);
 
     char *str_piped[2];
     int piped = 0;
@@ -215,6 +228,7 @@ int check_integrated_command(char **parsed, char *all) {
 }
 
 int main() {
+    init_path_files();
     char input[MAX_INPUT], *parsed_args[MAX_ARGS];
     char *parsed_args_piped[MAX_ARGS];
     int exec_flag = 0;

@@ -5,6 +5,8 @@
 #include <termios.h>
 #include <termcap.h>
 #include <iostream>
+#include <vector>
+#include <dirent.h>
 #include "util.hpp"
 #include "input.hpp"
 
@@ -12,6 +14,46 @@
 #define true 1
 #define false 0
 struct termios term, orig_term;
+
+std::vector<std::string> path_files;
+
+void init_path_files() {
+    std::string path = getenv("PATH");
+    std::string delimiter = ":";
+    size_t pos = 0;
+    std::string token;
+    while ((pos = path.find(delimiter)) != std::string::npos) {
+        token = path.substr(0, pos);
+
+        // Read all files in the directory
+        DIR *dir;
+        struct dirent *ent;
+        if ((dir = opendir(token.c_str())) != NULL) {
+            while ((ent = readdir(dir)) != NULL) {
+                path_files.push_back(ent->d_name);
+                printf("%s\t", ent->d_name);
+            }
+            printf("\n");
+            closedir(dir);
+        }
+
+        path.erase(0, pos + delimiter.length());
+    }
+
+    // Sort by length
+    std::sort(path_files.begin(), path_files.end(), [](std::string a, std::string b) { // -std=c++11
+        return a.length() < b.length();
+    });
+}
+
+std::string get_path_match(std::string str) {
+    for (int i = 0; i < path_files.size(); i++) {
+        if (path_files[i].find(str) == 0) {
+            return path_files[i];
+        }
+    }
+    return "";
+}
 
 void enable_input_mode() {
     // Wait for key press instead of enter
@@ -32,7 +74,14 @@ char get_key() {
 }
 
 std::string get_prefix() {
-    return ">> ";
+    std::string cwd = getcwd(NULL, 0);
+    // Replace home with ~
+    char *home = getenv("HOME");
+    if (cwd.find(home) == 0) {
+        cwd.replace(0, strlen(home), "~");
+    }
+
+    return cwd + " > ";
 }
 
 std::string get_input() {
@@ -65,7 +114,15 @@ std::string get_input() {
             input = input.substr(0, x) + c + input.substr(x, input.length());
             x++;
             // left arrow
-        } else if (c == 27 && get_key() == 91) {
+        }
+        
+        std::string match = get_path_match(input);
+        std::string match_substr = "";
+        if (match.length() > input.length()) {
+            match_substr = match.substr(input.length(), match.length());
+        }
+
+        if (c == 27 && get_key() == 91) {
             switch (get_key()) {
                 case 68:
                     if (x > 0) {
@@ -75,24 +132,34 @@ std::string get_input() {
                 case 67:
                     if (x < input.length()) {
                         x++;
+                    } else {
+                        input += match_substr;
+                        x += match_substr.length();
+                        match_substr = "";
                     }
                     break;
+            }
+        } else if (c == 9) {
+            if (match_substr.length() > 0) {
+                input += match_substr;
+                x += match_substr.length();
+                match_substr = "";
             }
         }
 
         set_pos(0, y - 1);
         std::string diff_spaces = "";
-        
+
         for (int i = 0; i < abs((int)old_input.length() - (int)input.length()); i++) {
             diff_spaces += " ";
         }
 
         std::string prefix = get_prefix();
-        std::cout << prefix << input << diff_spaces;
+        std::cout << prefix << input << match_substr << diff_spaces;
         set_pos(prefix.length() + x, y - 1);
         fflush(stdout);
 
-        old_input = input;
+        old_input = input + match_substr;
     }
 
     disable_raw_mode();
