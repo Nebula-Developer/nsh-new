@@ -32,7 +32,7 @@ void init_shell() {
 void exec_args(char **parsed) {
     pid_t pid = fork();
     if (pid == -1) {
-        printf("Failed to fork child process\n");
+        printf("nsh: failed to fork\n");
         return;
     } else if (pid == 0) {
         if (execvp(parsed[0], parsed) < 0) {
@@ -50,12 +50,12 @@ void exec_args_piped(char **parsed, char **parsed_pip) {
     pid_t p1, p2;
 
     if (pipe(pipefd) < 0) {
-        printf("\nPipe could not be initialized\n");
+        printf("\nnsh: Pipe could not be initialized\n");
         return;
     }
     p1 = fork();
     if (p1 < 0) {
-        printf("\nCould not fork\n");
+        printf("\nnsh: Could not fork\n");
         return;
     }
 

@@ -31,9 +31,7 @@ void init_path_files() {
         if ((dir = opendir(token.c_str())) != NULL) {
             while ((ent = readdir(dir)) != NULL) {
                 path_files.push_back(ent->d_name);
-                printf("%s\t", ent->d_name);
             }
-            printf("\n");
             closedir(dir);
         }
 
