@@ -49,7 +49,7 @@ void init_path_files() {
 
 std::string get_path_match(std::string str) {
     for (int i = 0; i < path_files.size(); i++) {
-        if (path_files[i].find(str) == 0) {
+        if (path_files[i].length() >= str.length() && path_files[i].substr(0, str.length()) == str) {
             return path_files[i];
         }
     }
@@ -116,7 +116,7 @@ std::string get_input() {
         std::string match = get_path_match(input);
         std::string match_substr = "";
         if (match.length() > input.length())
-            match_substr = match.substr(input.length(), match.length());
+            match_substr = match.substr(input.length() + 1, match.length());
 
         if (c == 10) break;
 
@@ -155,8 +155,8 @@ std::string get_input() {
                         if (x < input.length()) {
                             x++;
                         } else {
-                            input += match_substr;
-                            x += match_substr.length();
+                            input = match;
+                            x = input.length();
                             match_substr = "";
                         }
                         break;
