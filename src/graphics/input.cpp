@@ -10,7 +10,7 @@
 #include <signal.h>
 #include <algorithm>
 #include "colors.hpp"
-#include "util.hpp"
+#include "../util.hpp"
 #include "input.hpp"
 
 #define bool int
@@ -47,7 +47,7 @@ void init_path_files() {
     });
 }
 
-std::string get_path_match(std::string str) {
+std::string get_completion(std::string str) {
     for (int i = 0; i < path_files.size(); i++) {
         if (path_files[i].length() >= str.length() && path_files[i].substr(0, str.length()) == str) {
             return path_files[i];
@@ -113,7 +113,7 @@ std::string get_input() {
         int c = get_key();
         double time1 = get_time();
         
-        std::string match = get_path_match(input);
+        std::string match = get_completion(input);
         std::string match_substr = "";
         if (match.length() > input.length())
             match_substr = match.substr(input.length() + 1, match.length());

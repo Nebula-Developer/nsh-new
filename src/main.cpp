@@ -8,7 +8,7 @@
 #include <iostream>
 #include <regex>
 #include "util.hpp"
-#include "input.hpp"
+#include "./graphics/input.hpp"
 
 #define bool int
 #define true 1
