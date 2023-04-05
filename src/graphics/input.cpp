@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <signal.h>
 #include <algorithm>
+#include <math.h>
 #include "colors.hpp"
 #include "../util.hpp"
 #include "input.hpp"
@@ -197,7 +198,15 @@ std::string get_input() {
         old_input = input + match_substr;
 
         set_pos(0, y);
-        printf("Time: %f", get_time() - time1);
+        double timeRound = round((get_time() - time1) * 1000000);
+        char timeConv[1024];
+        memset(timeConv, 0, 1024);
+        snprintf(timeConv, 1024, "%f", timeRound);
+        std::string timeStr = timeConv;
+        int len = timeStr.length();
+        timeStr = timeStr.substr(0, (len > 5) ? 5 : len);
+
+        // printf("Time: %s", timeStr.c_str());
         set_pos(prefix_no_c.length() + x, y - 1);
         fflush(stdout);
     }
